@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Letter for you </title>
+    <style>
+        :root {
+            --background-white: #FFFFFF;
+            --soft-cream: #FFF8F0;
+            --sage: #A8D5BA;
+            --forest: #4F7942;
+            --soft-beige: #E8DCC4;
+            --warm-gold: #F4C95D;
+            --dark-text: #2D3748;
+            --shadow: rgba(79, 121, 66, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', system-ui, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--background-white) 0%, var(--soft-cream) 50%, #EEF6EE 100%);
+            overflow: hidden;
+            color: var(--dark-text);
+        }
+
+        .scene {
+            position: relative;
+            width: min(100%, 520px);
+            padding: 30px;
+            display: grid;
+            place-items: center;
+        }
+
+        .sparkle, .heart {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .sparkle {
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, var(--warm-gold) 0%, rgba(244,201,93,0.28) 65%);
+            filter: blur(1px);
+            animation: floatStars 8s infinite ease-in-out;
+            border-radius: 50%;
+        }
+
+        .heart {
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, var(--sage) 0%, var(--soft-beige) 100%);
+            border-radius: 50% 50% 45% 45%;
+            transform: rotate(45deg);
+            animation: drift 9s infinite ease-in-out;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #E9D5FF 0%, #A78BFA 100%);
+        }
+
+        .heart::before {
+            top: -9px;
+            left: 0;
+        }
+
+        .heart::after {
+            left: 9px;
+            top: 0;
+        }
+
+        @keyframes floatStars {
+            0%, 100% { transform: translateY(0) scale(0.95); opacity: 0.9; }
+            50% { transform: translateY(-18px) scale(1.1); opacity: 1; }
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translateY(0) translateX(0) rotate(45deg); opacity: 0.9; }
+            50% { transform: translateY(-30px) translateX(12px) rotate(45deg); opacity: 1; }
+        }
+
+        @keyframes floatHeart {
+            0% { opacity: 0; transform: translateY(0) rotate(45deg) scale(0.8); }
+            10% { opacity: 1; }
+            50% { transform: translateY(-80px) translateX(18px) rotate(45deg) scale(1); }
+            100% { opacity: 0; transform: translateY(-160px) translateX(-10px) rotate(45deg) scale(0.8); }
+        }
+
+        .card-frame {
+            position: relative;
+            width: 100%;
+            max-width: 460px;
+            min-height: 640px;
+            padding: 40px 24px 36px;
+            border-radius: 36px;
+            background: linear-gradient(180deg, var(--soft-cream) 0%, var(--background-white) 100%);
+            box-shadow: 0 24px 70px var(--shadow);
+            border: 1px solid rgba(79, 121, 66, 0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .glow {
+            position: absolute;
+            inset: -18px;
+            background: radial-gradient(circle at center, rgba(168,213,186,0.35), rgba(244,201,93,0.12) 40%, transparent 70%);
+            filter: blur(20px);
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .card-frame.active .glow {
+            opacity: 1;
+        }
+
+        .card-frame.active .title,
+        .card-frame.active .subtitle,
+        .card-frame.active .letter-details {
+            opacity: 0;
+            transform: translateY(12px);
+            pointer-events: none;
+        }
+
+        .title,
+        .subtitle,
+        .letter-details {
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+
+        .message-layer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 18px;
+            padding: 10px 0 0;
+        }
+
+        .main-content {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 18px;
+        }
+
+        .title {
+            font-size: clamp(1.4rem, 2.2vw, 2.2rem);
+            margin-bottom: 18px;
+            letter-spacing: 0.03em;
+            color: var(--dark-text);
+        }
+
+        .subtitle {
+            color: #6B7280;
+            font-size: 1rem;
+            line-height: 1.7;
+            max-width: 82%;
+            margin: 0 auto 18px;
+        }
+
+        .envelope-container {
+            position: relative;
+            width: 280px;
+            height: 240px;
+            margin: 0 auto 24px;
+            cursor: pointer;
+            perspective: 1200px;
+            transition: transform 0.28s ease;
+        }
+
+        .envelope-container:hover {
+            transform: translateY(-4px) scale(1.02);
+        }
+
+        .envelope {
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            background: linear-gradient(180deg, var(--background-white) 0%, var(--soft-cream) 100%);
+            box-shadow: 0 0 0 2px rgba(79,121,66,0.06), 0 18px 40px var(--shadow);
+            border: 2px solid rgba(79,121,66,0.06);
+        }
+
+        .flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 68%;
+            background: linear-gradient(180deg, #EAF6EE 0%, var(--sage) 50%, #8FCB96 100%);
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 70%, 0 100%);
+            transform-origin: top center;
+            transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 2;
+            backface-visibility: hidden;
+            box-shadow: inset 0 -8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .envelope.open .flap {
+            transform: rotateX(-180deg) translateY(-4px);
+        }
+
+        .seal {
+            position: absolute;
+            top: 42%;
+            left: 50%;
+            width: 64px;
+            height: 64px;
+            transform: translateX(-50%);
+            background: radial-gradient(circle at 30% 30%, var(--soft-beige), var(--warm-gold) 55%, #D4A83A 100%);
+            border-radius: 50%;
+            box-shadow: inset 0 0 18px rgba(255,255,255,0.6), 0 10px 18px rgba(244,201,93,0.22);
+            z-index: 2;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+
+        .letter-card {
+            position: absolute;
+            top: 28px;
+            left: 50%;
+            width: 288px;
+            height: 268px;
+            transform: translate(-50%, 30px) scale(0.9);
+            border-radius: 28px;
+            background: linear-gradient(180deg, var(--background-white) 0%, var(--soft-cream) 100%);
+            border: 1px solid rgba(79,121,66,0.06);
+            box-shadow: 0 50px 110px rgba(79,121,66,0.10);
+            opacity: 0;
+            transform-style: preserve-3d;
+            transition: opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s;
+            z-index: 4;
+        }
+
+        .envelope.open .flap {
+            transform: rotateX(-180deg) translateY(-4px);
+            z-index: 0;
+        }
+
+        .envelope.open .seal {
+            opacity: 0;
+            transform: translateY(-16px) scale(0.8);
+        }
+
+        .envelope.open .letter-card {
+            opacity: 1;
+            transform: translate(-50%, -70px) scale(1);
+        }
+
+        .card-frame.active .title,
+        .card-frame.active .subtitle,
+        .card-frame.active .letter-details,
+        .card-frame.active .buttons {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(14px);
+            pointer-events: none;
+        }
+
+        .letter-inner {
+            position: absolute;
+            inset: 14px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, var(--soft-cream) 0%, var(--background-white) 100%);
+            padding: 32px 28px 26px; /* extra right padding as safety margin */
+            display: grid;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .letter-text {
+            font-size: 0.95rem;
+            line-height: 1.85;
+            color: var(--dark-text);
+            min-height: 210px;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            text-align: left;
+            margin-bottom: 4px;
+        }
+
+        .letter-heading {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.35rem;
+            color: var(--forest);
+        }
+
+        .hint {
+            font-size: 0.94rem;
+            color: #8f6f8f;
+        }
+
+        .replay-button,
+        .audio-control {
+            appearance: none;
+            border: none;
+            outline: none;
+            border-radius: 999px;
+            padding: 12px 18px;
+            font-size: 0.98rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 12px 24px rgba(79,121,66,0.08);
+            background: linear-gradient(135deg, var(--warm-gold) 0%, #E6B84A 100%);
+            color: var(--dark-text);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(8px);
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .footer {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 18px;
+            padding-top: 14px;
+            padding-bottom: 10px;
+        }
+
+        .replay-button,
+        .audio-control,
+        .back-button {
+            min-width: 170px;
+            max-width: 240px;
+            width: clamp(170px, 36%, 220px);
+            text-align: center;
+        }
+
+        .replay-button:hover,
+        .audio-control:hover,
+        .back-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .replay-button:active,
+        .audio-control:active,
+        .back-button:active {
+            transform: translateY(0px);
+        }
+
+        .back-button {
+            appearance: none;
+            border: none;
+            outline: none;
+            border-radius: 999px;
+            padding: 12px 18px;
+            font-size: 0.98rem;
+            cursor: pointer;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 12px 24px rgba(79,121,66,0.08);
+            background: linear-gradient(135deg, var(--forest) 0%, #3E6B36 100%);
+            color: #FFFFFF;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(8px);
+        }
+
+        .back-button.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 8px;
+            height: 22px;
+            opacity: 0;
+            border-radius: 4px;
+            transform-origin: center;
+            animation: confetti-fall 2s ease-out forwards;
+        }
+
+        /* Replay button visible state (same as back button) */
+        .replay-button.visible,
+        .back-button.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        /* Dinosaur companion styling */
+        .dino-wrapper {
+            position: absolute;
+            width: 120px;
+            height: 110px;
+            /* move slightly outside the card to the right so it doesn't cover text */
+            right: -8px;
+            bottom: 6px;
+            z-index: 6;
+            transform-origin: center bottom;
+            transition: transform 0.45s cubic-bezier(.2,.9,.2,1), opacity 0.35s ease, right 0.45s ease, bottom 0.45s ease, width 0.45s ease, height 0.45s ease;
+            pointer-events: none;
+        }
+
+        .dino-wrapper.open-bottom {
+            left: 50%;
+            right: auto;
+            bottom: -48px;
+            width: 108px;
+            height: 98px;
+            transform: translate(-50%, 28px);
+            opacity: 0;
+        }
+
+        .dino-wrapper.open-bottom.slide-in {
+            transform: translate(-50%, 4px);
+            opacity: 1;
+        }
+
+        #dino { display: block; }
+
+        /* Dino animations */
+        @keyframes dino-bounce {
+            0% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+            100% { transform: translateY(0); }
+        }
+
+        @keyframes dino-wave {
+            0% { transform: rotate(-12deg); }
+            40% { transform: rotate(6deg); }
+            100% { transform: rotate(-12deg); }
+        }
+
+        @keyframes dino-blink {
+            0%, 10%, 100% { transform: scaleY(1); }
+            5% { transform: scaleY(0.15); }
+        }
+
+        .dino-react { animation: dino-bounce 800ms ease both; }
+        .dino-react #arm { animation: dino-wave 900ms ease 120ms both; transform-origin: 64px 50px; }
+        .dino-react .eye { transform-origin: center; animation: dino-blink 3s linear both; }
+
+        /* Footprints used during celebration */
+        .footprint {
+            position: absolute;
+            width: 18px;
+            height: 12px;
+            background: linear-gradient(135deg, var(--forest), var(--sage));
+            border-radius: 6px 6px 10px 10px / 6px 6px 10px 10px;
+            opacity: 0;
+            transform: translateY(0) rotate(-18deg) scale(0.9);
+            filter: drop-shadow(0 6px 10px rgba(79,121,66,0.08));
+            z-index: 5;
+            animation: footprint-walk 1100ms ease-out forwards;
+        }
+
+        @keyframes footprint-walk {
+            0% { opacity: 0; transform: translateY(0) translateX(0) rotate(-18deg) scale(0.9); }
+            30% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(68px) translateX(12px) rotate(-18deg) scale(0.9); }
+        }
+
+        @keyframes confetti-fall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg) scaleY(1); }
+            100% { opacity: 0; transform: translateY(380px) rotate(520deg) scaleY(1.1); }
+        }
+
+        .letter-details {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 0.95rem;
+            color: rgba(45,55,72,0.68);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 520px) {
+            .envelope-container { width: 200px; height: 150px; }
+            .letter-card { width: 200px; height: 168px; }
+            .card-frame { padding: 26px 18px 18px; }
+            .title { font-size: 1.8rem; }
+        }
+
+        /* Tablet and small laptop adjustments (covers Xiaomi Pad 7 landscape/portrait) */
+        @media (max-width: 900px) {
+            .scene { width: min(96%, 720px); padding: 20px; }
+            .card-frame { max-width: 720px; min-height: 580px; padding: 22px; border-radius: 28px; }
+            .envelope-container { width: 240px; height: 200px; }
+            .letter-card { width: 240px; height: 220px; top: 22px; }
+            .letter-inner { padding: 20px 16px 16px; }
+            /* keep the dino off the card on tablets so it doesn't overlap text */
+            .dino-wrapper { right: -12px; bottom: 8px; width: 104px; height: 96px; }
+            .title { font-size: clamp(1.3rem, 3.6vw, 2.0rem); }
+            .subtitle { font-size: 0.98rem; max-width: 88%; }
+            .letter-text { min-height: 180px; font-size: 0.95rem; }
+            .footer { padding-top: 12px; }
+            .replay-button, .back-button { padding: 10px 14px; font-size: 0.95rem; }
+        }
+
+        /* Landscape tablets and larger tablet widths - nudge dino further right and increase right padding */
+        @media (min-width: 800px) and (orientation: landscape) {
+            .dino-wrapper { right: -28px; bottom: 12px; width: 140px; height: 126px; }
+            .letter-inner { padding-right: 40px; }
+        }
+
+        /* Slightly larger phones / small tablets portrait */
+        @media (max-width: 760px) and (min-width: 521px) {
+            .envelope-container { width: 220px; height: 170px; }
+            .letter-card { width: 220px; height: 190px; }
+            .dino-wrapper { right: -8px; bottom: 6px; width: 96px; height: 86px; }
+            .card-frame { min-height: 620px; }
+        }
+
+        /* Ensure dinosaur doesn't overlap letter on very narrow widths - move it above envelope */
+        @media (max-width: 420px) {
+            .dino-wrapper { position: relative; right: auto; bottom: auto; margin-top: 8px; transform: translateY(0); order: -1; }
+            .envelope-container { margin-top: 6px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scene">
+        <div class="sparkle" style="top: 10%; left: 15%; animation-delay: -1.3s;"></div>
+        <div class="sparkle" style="top: 20%; left: 78%; animation-delay: -2.1s; width: 14px; height: 14px;"></div>
+        <div class="sparkle" style="top: 70%; left: 10%; animation-delay: -0.6s;"></div>
+        <div class="sparkle" style="top: 86%; left: 40%; animation-delay: -3.3s;"></div>
+        <div class="heart" style="top: 15%; left: 50%; animation-delay: -2s;"></div>
+        <div class="heart" style="top: 50%; left: 85%; animation-delay: -1.4s;"></div>
+        <div class="heart" style="top: 80%; left: 20%; animation-delay: -0.8s;"></div>
+
+        <div class="card-frame" id="cardFrame">
+            <div class="glow"></div>
+            <div class="message-layer">
+                <div class="envelope-container" id="envelopeButton" aria-label="Open your special letter" role="button" tabindex="0">
+                    <div class="envelope" id="envelope">
+                            <div class="flap"></div>
+                            <div class="seal"></div>
+                            <div class="letter-card" id="letterCard">
+                                <div class="letter-inner">
+                                    <div class="letter-heading">A letter for you</div>
+                                    <div class="letter-text" id="letterText"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dinosaur companion (cute chubby baby dino) -->
+                        <div id="dinoWrapper" class="dino-wrapper" aria-hidden="false">
+                            <svg id="dino" width="120" height="110" viewBox="0 0 120 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="dino-body" transform="translate(10,6)">
+                                    <ellipse id="body" cx="45" cy="58" rx="36" ry="28" fill="#A8D5BA" />
+                                    <ellipse id="belly" cx="42" cy="64" rx="22" ry="14" fill="#E8DCC4" opacity="0.95" />
+                                    <circle id="head" cx="18" cy="36" r="18" fill="#EAF6EE" />
+                                    <g id="eyeGroup" transform="translate(8,26)">
+                                        <ellipse class="eye" id="eye-left" cx="4" cy="4" rx="3" ry="3" fill="#2D3748" />
+                                        <ellipse class="eye" id="eye-right" cx="14" cy="4" rx="3" ry="3" fill="#2D3748" />
+                                    </g>
+                                    <path id="mouth" d="M18 44 Q22 48 28 44" stroke="#1F2937" stroke-width="1.6" fill="none" stroke-linecap="round" />
+                                    <path id="arm" d="M56 50 q10 -6 14 0" stroke="#9F7AEA" stroke-width="6" stroke-linecap="round" fill="none" transform="rotate(-12 64 50)" />
+                                    <g id="spikes" transform="translate(6,14)">
+                                        <polygon points="8,6 14,0 20,6" fill="#4F7942" opacity="0.9" />
+                                        <polygon points="22,6 28,0 34,6" fill="#4F7942" opacity="0.85" transform="translate(12,0)" />
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+                </div>
+                <h1 class="title" id="introTitle">You have a special letter 🦕💌</h1>
+                <p class="subtitle" id="introSubtitle">Tap the envelope to open a warm message just for you.</p>
+                <p class="letter-details">Soft pastel warmth, floating hearts, and a gentle celebration just for you.</p>
+            </div>
+            <div class="footer">
+                <button class="replay-button" id="replayButton">Replay</button>
+                <button class="back-button" id="backButton">Back to beginning</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const envelopeButton = document.getElementById('envelopeButton');
+        const envelope = document.getElementById('envelope');
+        const cardFrame = document.getElementById('cardFrame');
+        const letterText = document.getElementById('letterText');
+        const introTitle = document.getElementById('introTitle');
+        const introSubtitle = document.getElementById('introSubtitle');
+        const backButton = document.getElementById('backButton');
+        const replayButton = document.getElementById('replayButton');
+        const dino = document.getElementById('dino');
+        const dinoWrapper = document.getElementById('dinoWrapper');
+
+        const message = "I'm so proud of you for everything you do. No matter how hard things get, you keep going, and that's something truly admirable. Take care always, lab lab. 💖";
+        let typedIndex = 0;
+        let typingInterval = null;
+        let confettiPieces = [];
+        let audioContext = null;
+        let musicEnabled = false;
+        let backgroundOsc1 = null;
+        let backgroundOsc2 = null;
+        let gainNode = null;
+
+        function createConfetti() {
+            removeConfetti();
+            const count = 24;
+            for (let i = 0; i < count; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = `${Math.random() * 100}%`;
+                piece.style.background = ['#4F7942', '#F4C95D', '#E8DCC4', '#FFFFFF'][Math.floor(Math.random() * 4)];
+                piece.style.width = `${Math.random() * 8 + 6}px`;
+                piece.style.height = `${Math.random() * 18 + 12}px`;
+                piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+                piece.style.animationDuration = `${1.6 + Math.random() * 0.8}s`;
+                piece.style.animationDelay = `${Math.random() * 0.2}s`;
+                cardFrame.appendChild(piece);
+                confettiPieces.push(piece);
+            }
+        }
+
+        function removeConfetti() {
+            confettiPieces.forEach(el => el.remove());
+            confettiPieces = [];
+        }
+
+        /* Spawn small stars around the dinosaur during celebration */
+        function spawnDinoStars() {
+            const starCount = 8;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'sparkle';
+                star.style.left = `${65 + Math.random() * 30}%`;
+                star.style.top = `${40 + Math.random() * 40}%`;
+                star.style.width = `${6 + Math.random() * 10}px`;
+                star.style.height = star.style.width;
+                star.style.opacity = 0;
+                cardFrame.appendChild(star);
+                setTimeout(() => star.remove(), 2500);
+            }
+        }
+
+        /* Spawn tiny dinosaur footprints for playful celebration */
+        function spawnFootprints() {
+            const steps = 6;
+            for (let i = 0; i < steps; i++) {
+                const foot = document.createElement('div');
+                foot.className = 'footprint';
+                foot.style.left = `${20 + i * 10 + Math.random() * 8}%`;
+                foot.style.top = `${58 + Math.random() * 12}%`;
+                foot.style.animationDelay = `${i * 90}ms`;
+                cardFrame.appendChild(foot);
+                setTimeout(() => foot.remove(), 1300 + i * 90);
+            }
+        }
+
+        /* Make the dino react: blink, wave and bounce briefly */
+        function dinoReact() {
+            if (!dino) return;
+            dino.classList.remove('dino-react');
+            // trigger reflow to restart animation
+            void dino.offsetWidth;
+            dino.classList.add('dino-react');
+        }
+
+        function spawnFloatingHearts() {
+            const heartCount = 6;
+            for (let i = 0; i < heartCount; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.style.left = `${10 + Math.random() * 80}%`;
+                heart.style.top = `${50 + Math.random() * 40}%`;
+                heart.style.opacity = 0;
+                heart.style.animation = `floatHeart 6s ease-in-out ${Math.random() * 0.6}s infinite`;
+                heart.style.width = `${14 + Math.random() * 10}px`;
+                heart.style.height = `${14 + Math.random() * 10}px`;
+                heart.style.transform = 'rotate(45deg) scale(0.85)';
+                heart.style.background = 'linear-gradient(135deg, var(--sage), var(--soft-beige))';
+                heart.innerHTML = '';
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 7500);
+            }
+        }
+
+        function playCelebrationSound() {
+            if (!window.AudioContext && !window.webkitAudioContext) return;
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const master = ctx.createGain();
+            master.gain.value = 0.16;
+            master.connect(ctx.destination);
+
+            const frequencies = [420, 520, 620, 740];
+            frequencies.forEach((freq, index) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.value = 0;
+                osc.connect(gain).connect(master);
+                osc.start(ctx.currentTime + index * 0.05);
+                gain.gain.setValueAtTime(0, ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.05 + index * 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9 + index * 0.1);
+                osc.stop(ctx.currentTime + 1.1 + index * 0.1);
+            });
+        }
+
+        function initBackgroundMusic() {
+            if (audioContext) return;
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            gainNode = audioContext.createGain();
+            gainNode.gain.value = 0.02;
+            gainNode.connect(audioContext.destination);
+
+            backgroundOsc1 = audioContext.createOscillator();
+            backgroundOsc1.type = 'triangle';
+            backgroundOsc1.frequency.value = 160;
+            const oscGain1 = audioContext.createGain();
+            oscGain1.gain.value = 0.014;
+            backgroundOsc1.connect(oscGain1).connect(gainNode);
+
+            backgroundOsc2 = audioContext.createOscillator();
+            backgroundOsc2.type = 'sine';
+            backgroundOsc2.frequency.value = 210;
+            const oscGain2 = audioContext.createGain();
+            oscGain2.gain.value = 0.01;
+            backgroundOsc2.connect(oscGain2).connect(gainNode);
+
+            backgroundOsc1.start();
+            backgroundOsc2.start();
+
+            const lfo = audioContext.createOscillator();
+            lfo.frequency.value = 0.18;
+            const lfoGain = audioContext.createGain();
+            lfoGain.gain.value = 28;
+            lfo.connect(lfoGain);
+            lfoGain.connect(backgroundOsc1.frequency);
+            lfoGain.connect(backgroundOsc2.frequency);
+            lfo.start();
+        }
+
+        function toggleMusic() {
+            if (!audioContext) initBackgroundMusic();
+            if (!musicEnabled) {
+                if (audioContext.state === 'suspended') audioContext.resume();
+                audioToggle.textContent = 'Pause music';
+            } else {
+                audioToggle.textContent = 'Play music';
+                audioContext.suspend();
+            }
+            musicEnabled = !musicEnabled;
+        }
+
+        function typeMessage() {
+            letterText.textContent = '';
+            typedIndex = 0;
+            introTitle.textContent = 'A heartfelt note for you';
+            introSubtitle.textContent = 'The letter is opening with a soft message...';
+            clearInterval(typingInterval);
+            typingInterval = setInterval(() => {
+                if (typedIndex < message.length) {
+                    letterText.textContent += message[typedIndex];
+                    typedIndex += 1;
+                } else {
+                    clearInterval(typingInterval);
+                    spawnFloatingHearts();
+                    spawnDinoStars();
+                    spawnFootprints();
+                    dinoReact();
+                    showBackButton();
+                }
+            }, 45);
+        }
+
+        function openEnvelope() {
+            if (envelope.classList.contains('open')) return;
+            envelope.classList.add('open');
+            cardFrame.classList.add('active');
+            if (dinoWrapper) {
+                dinoWrapper.classList.add('open-bottom');
+                requestAnimationFrame(() => dinoWrapper.classList.add('slide-in'));
+            }
+            createConfetti();
+            setTimeout(playCelebrationSound, 220);
+            dinoReact();
+            setTimeout(typeMessage, 700);
+        }
+
+        function resetScene() {
+            envelope.classList.remove('open');
+            cardFrame.classList.remove('active');
+            if (dinoWrapper) dinoWrapper.classList.remove('open-bottom', 'slide-in');
+            letterText.textContent = '';
+            introTitle.textContent = 'You have a special letter 🦕💌';
+            introSubtitle.textContent = 'Tap the envelope to open a warm message just for you.';
+            backButton.classList.remove('visible');
+            removeConfetti();
+            clearInterval(typingInterval);
+        }
+
+        function showBackButton() {
+            backButton.classList.add('visible');
+        }
+
+        function returnToEnvelope() {
+            resetScene();
+        }
+
+        envelopeButton.addEventListener('click', openEnvelope);
+        envelopeButton.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openEnvelope();
+            }
+        });
+        backButton.addEventListener('click', returnToEnvelope);
+        replayButton.addEventListener('click', () => {
+            // replay animation: reset then open after a short delay
+            resetScene();
+            setTimeout(() => {
+                openEnvelope();
+            }, 220);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            body.style.opacity = 0;
+            body.style.transition = 'opacity 0.8s ease';
+            requestAnimationFrame(() => body.style.opacity = 1);
+        });
+    </script>
+</body>
+</html>
